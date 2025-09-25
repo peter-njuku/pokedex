@@ -32,3 +32,4 @@ go.work.sum
 # .vscode/
 repl.log
 *_tests.go
+pokedex.json

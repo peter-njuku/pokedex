@@ -112,23 +112,23 @@ func caught(cfg *config, pokemonName string) bool {
 }
 
 func commandInspect(cfg *config, pokemonName string) error {
-	resp, err := cfg.pokeapiClient.GetPokemon(pokemonName)
-	if err != nil {
-		return err
+	pokemon, ok := cfg.pokedex[pokemonName]
+	if !ok {
+		return errors.New("you have not caught that pokemon")
 	}
-	if caught(cfg, pokemonName) {
-		fmt.Printf("Name: %s\n", resp.Name)
-		fmt.Printf("Height: %d\n", resp.Height)
-		fmt.Printf("Weight: %d\n", resp.Weight)
-		fmt.Println("Stats:")
-		for _, s := range resp.Stats {
-			fmt.Printf("	- %s: %d\n", s.Stat.Name, s.BaseStat)
-		}
-		fmt.Println("Types:")
-		for _, s := range resp.Types {
-			fmt.Printf("	- %s\n", s.Type.Name)
-		}
+
+	fmt.Printf("Name: %s\n", pokemon.Name)
+	fmt.Printf("Height: %d\n", pokemon.Height)
+	fmt.Printf("Weight: %d\n", pokemon.Weight)
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf("  -%s: %d\n", stat.Stat.Name, stat.BaseStat)
 	}
+	fmt.Println("Types:")
+	for _, t := range pokemon.Types {
+		fmt.Printf("  - %s\n", t.Type.Name)
+	}
+
 	return nil
 }
 
@@ -153,6 +153,11 @@ func commandCatch(cfg *config, pokemonName string) error {
 			cfg.pokedex = make(map[string]pokeapi.PokemonResponse)
 		}
 		cfg.pokedex[resp.Species.Name] = resp
+		if err := savePokedex(cfg); err != nil {
+			fmt.Println("Could not save pokedex")
+		} else {
+			fmt.Println("Pokedex updated successfully")
+		}
 
 		fmt.Println("You may inspect it using the inspect command")
 	} else {
