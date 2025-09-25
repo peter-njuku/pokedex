@@ -13,6 +13,7 @@ type config struct {
 	pokeapiClient           pokeapi.Client
 	nextLocationAreaURL     *string
 	previousLocationAreaURL *string
+	pokedex                 map[string]pokeapi.PokemonResponse
 }
 
 func cleanInput(text string) []string {
@@ -37,6 +38,7 @@ func repl(cfg *config) {
 		}
 
 		cmdName := words[0]
+		args := words[1:]
 
 		availableCommands := getCommands()
 
@@ -45,7 +47,7 @@ func repl(cfg *config) {
 			fmt.Println("Unknown command:", cmdName)
 			continue
 		}
-		if err := cmd.callback(cfg); err != nil {
+		if err := cmd.callback(cfg, args); err != nil {
 			fmt.Println("Error:", err)
 		}
 	}
@@ -54,6 +56,7 @@ func repl(cfg *config) {
 func main() {
 	cfg := config{
 		pokeapiClient: pokeapi.NewCLient(),
+		pokedex:       make(map[string]pokeapi.PokemonResponse),
 	}
 
 	repl(&cfg)
